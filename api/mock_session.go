@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 )
 
 type MockSession struct {
@@ -44,8 +45,9 @@ func (s *MockSession) SetCredentials(accessID, accessKey string) {
 	s.accessKey = accessKey
 }
 
-func (s *MockSession) NewRequest(method string, endpoint string) (*http.Request, error) {
-	uri := fmt.Sprintf("%s%s", s.address, endpoint)
+func (s *MockSession) NewRequest(method string, endpoint string, params url.Values) (*http.Request, error) {
+	uri := fmt.Sprintf("%s%s?%s", s.address, endpoint, params.Encode())
+	uri = strings.TrimRight(uri, "?")
 	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
 		return nil, err
