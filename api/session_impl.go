@@ -25,12 +25,6 @@ func DefaultSession() *SessionImpl {
 	return s
 }
 
-func NewSession() *SessionImpl {
-	s := &SessionImpl{}
-	s.SetAddress(DEFAULT_SUMO_ADDRESS)
-	return s
-}
-
 func (s *SessionImpl) SetAddress(address string) {
 	s.address = address
 }
@@ -43,10 +37,12 @@ func (s *SessionImpl) SetCredentials(accessID, accessKey string) {
 func (s *SessionImpl) NewRequest(method string, endpoint string, params url.Values) (*http.Request, error) {
 	uri := fmt.Sprintf("%s%s?%s", s.address, endpoint, params.Encode())
 	uri = strings.TrimRight(uri, "?")
-	req, err := http.NewRequest(method, uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth(s.accessID, s.accessKey)
-	return req, nil
+	return http.NewRequest(method, uri, nil)
+}
+
+func (s *SessionImpl) CreateTransport() http.RoundTripper {
+	return NewAnonymousTransport(func(req *http.Request) (*http.Response, error) {
+		req.SetBasicAuth(s.accessID, s.accessKey)
+		return http.DefaultTransport.RoundTrip(req)
+	})
 }

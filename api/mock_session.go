@@ -48,10 +48,12 @@ func (s *MockSession) SetCredentials(accessID, accessKey string) {
 func (s *MockSession) NewRequest(method string, endpoint string, params url.Values) (*http.Request, error) {
 	uri := fmt.Sprintf("%s%s?%s", s.address, endpoint, params.Encode())
 	uri = strings.TrimRight(uri, "?")
-	req, err := http.NewRequest(method, uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth(s.accessID, s.accessKey)
-	return req, nil
+	return http.NewRequest(method, uri, nil)
+}
+
+func (s *MockSession) CreateTransport() http.RoundTripper {
+	return NewAnonymousTransport(func(req *http.Request) (*http.Response, error) {
+		req.SetBasicAuth(s.accessID, s.accessKey)
+		return http.DefaultTransport.RoundTrip(req)
+	})
 }

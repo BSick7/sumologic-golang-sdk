@@ -10,7 +10,13 @@ type Client struct {
 
 func NewClient(session Session) *Client {
 	return &Client{
-		executor: NewClientExecutor(session, http.DefaultClient),
+		executor: NewClientExecutor(session, createHttpClient(session)),
+	}
+}
+
+func createHttpClient(session Session) *http.Client {
+	return &http.Client{
+		Transport: session.CreateTransport(),
 	}
 }
 
