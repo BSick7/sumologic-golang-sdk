@@ -51,6 +51,10 @@ type CollectorLink struct {
 	Href string `json:"href"`
 }
 
+func (c *Collectors) Sources(collectorID int) *Sources {
+	return NewSources(c.executor, collectorID)
+}
+
 func (c *Collectors) List(offset int, limit int) ([]*Collector, error) {
 	req, err := c.executor.NewRequest()
 	if err != nil {
