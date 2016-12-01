@@ -8,6 +8,6 @@ import (
 func main() {
 	session := api.DefaultSession()
 	client := api.NewClient(session)
-	collectors, err := client.Collectors().List(0, 1000)
+	collectors, err := client.Collectors().List(0, 5)
 	fmt.Println(collectors, err)
 }

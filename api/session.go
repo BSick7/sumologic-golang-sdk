@@ -1,5 +1,10 @@
 package api
 
+/// All implementations of Session are expected to use the following environment variables:
+///   SUMO_ACCESS_ID
+///   SUMO_ACCESS_KEY
+///   SUMO_DEBUG (turns on request/response logging)
+
 import (
 	"net/http"
 	"net/url"
@@ -8,6 +13,6 @@ import (
 type Session interface {
 	SetAddress(address string)
 	SetCredentials(accessID, accessKey string)
-	NewRequest(method string, endpoint string, params url.Values) (*http.Request, error)
+	EndpointURL(endpoint string) *url.URL
 	CreateTransport() http.RoundTripper
 }

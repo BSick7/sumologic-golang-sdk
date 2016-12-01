@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 )
 
 const (
@@ -34,10 +33,13 @@ func (s *SessionImpl) SetCredentials(accessID, accessKey string) {
 	s.accessKey = accessKey
 }
 
-func (s *SessionImpl) NewRequest(method string, endpoint string, params url.Values) (*http.Request, error) {
-	uri := fmt.Sprintf("%s%s?%s", s.address, endpoint, params.Encode())
-	uri = strings.TrimRight(uri, "?")
-	return http.NewRequest(method, uri, nil)
+func (s *SessionImpl) Address() string {
+	return s.address
+}
+
+func (s *SessionImpl) EndpointURL(endpoint string) *url.URL {
+	uri, _ := url.Parse(fmt.Sprintf("%s%s", s.address, endpoint))
+	return uri
 }
 
 func (s *SessionImpl) CreateTransport() http.RoundTripper {

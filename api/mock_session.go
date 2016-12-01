@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strings"
 )
 
 type MockSession struct {
@@ -45,10 +44,13 @@ func (s *MockSession) SetCredentials(accessID, accessKey string) {
 	s.accessKey = accessKey
 }
 
-func (s *MockSession) NewRequest(method string, endpoint string, params url.Values) (*http.Request, error) {
-	uri := fmt.Sprintf("%s%s?%s", s.address, endpoint, params.Encode())
-	uri = strings.TrimRight(uri, "?")
-	return http.NewRequest(method, uri, nil)
+func (s *MockSession) Address() string {
+	return s.address
+}
+
+func (s *MockSession) EndpointURL(endpoint string) *url.URL {
+	uri, _ := url.Parse(fmt.Sprintf("%s%s", s.address, endpoint))
+	return uri
 }
 
 func (s *MockSession) CreateTransport() http.RoundTripper {
