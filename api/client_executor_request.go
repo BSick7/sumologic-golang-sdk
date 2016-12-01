@@ -17,11 +17,13 @@ type ClientExecutorRequest struct {
 	session Session
 	client  *http.Client
 	req     *http.Request
+	reqBody *bytes.Buffer
 	res     *http.Response
 }
 
 func NewClientExecutorRequest(session Session, client *http.Client) (*ClientExecutorRequest, error) {
-	req, err := http.NewRequest("GET", "/", nil)
+	buf := bytes.NewBuffer(nil)
+	req, err := http.NewRequest("GET", "/", buf)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %s", err)
 	}
@@ -30,6 +32,7 @@ func NewClientExecutorRequest(session Session, client *http.Client) (*ClientExec
 		session: session,
 		client:  client,
 		req:     req,
+		reqBody: buf,
 	}, nil
 }
 
@@ -49,12 +52,11 @@ func (r *ClientExecutorRequest) SetRequestHeader(key string, value string) *Clie
 }
 
 func (r *ClientExecutorRequest) SetJSONBody(input interface{}) error {
-	bodyRaw, err := json.Marshal(input)
-	if err != nil {
-		return fmt.Errorf("error serializing body: %s", err)
+	encoder := json.NewEncoder(r.reqBody)
+	if err := encoder.Encode(input); err != nil {
+		return fmt.Errorf("error encoding json body: %s", err)
 	}
-	r.req.Write(bytes.NewBuffer(bodyRaw))
-	r.req.Header.Add("Content-Type", "application/json")
+	r.req.Header.Set("Content-Type", "application/json")
 	return nil
 }
 
@@ -102,17 +104,16 @@ func (r *ClientExecutorRequest) do() error {
 }
 
 func (r *ClientExecutorRequest) GetJSONBody(out interface{}) error {
-	raw, err := ioutil.ReadAll(r.res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response: %s", err)
-	}
-	if err := json.Unmarshal(raw, out); err != nil {
-		return fmt.Errorf("error deserializing json body: %s", err)
+	decoder := json.NewDecoder(r.res.Body)
+	defer r.res.Body.Close()
+	if err := decoder.Decode(out); err != nil {
+		return fmt.Errorf("error decoding json body: %s", err)
 	}
 	return nil
 }
 
 func (r *ClientExecutorRequest) GetStringBody() (string, error) {
+	defer r.res.Body.Close()
 	raw, err := ioutil.ReadAll(r.res.Body)
 	if err != nil {
 		return "", fmt.Errorf("error reading response: %s", err)
@@ -121,6 +122,7 @@ func (r *ClientExecutorRequest) GetStringBody() (string, error) {
 }
 
 func (r *ClientExecutorRequest) GetRawBody() ([]byte, error) {
+	defer r.res.Body.Close()
 	raw, err := ioutil.ReadAll(r.res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response: %s", err)
