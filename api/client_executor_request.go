@@ -95,7 +95,7 @@ func (r *ClientExecutorRequest) do() error {
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("error response %s %s => %d: %s", r.req.Method, r.req.URL, res.StatusCode, res.Status)
+		return NewAPIError(r)
 	}
 
 	return nil
@@ -110,6 +110,22 @@ func (r *ClientExecutorRequest) GetJSONBody(out interface{}) error {
 		return fmt.Errorf("error deserializing json body: %s", err)
 	}
 	return nil
+}
+
+func (r *ClientExecutorRequest) GetStringBody() (string, error) {
+	raw, err := ioutil.ReadAll(r.res.Body)
+	if err != nil {
+		return "", fmt.Errorf("error reading response: %s", err)
+	}
+	return string(raw), nil
+}
+
+func (r *ClientExecutorRequest) GetRawBody() ([]byte, error) {
+	raw, err := ioutil.ReadAll(r.res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %s", err)
+	}
+	return raw, nil
 }
 
 func (r *ClientExecutorRequest) GetResponseHeader(key string) string {
