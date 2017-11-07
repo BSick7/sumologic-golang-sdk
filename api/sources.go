@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// SumoLogic API Reference
+// https://help.sumologic.com/APIs/01Collector-Management-API/Source-API
 type Sources struct {
 	executor    *ClientExecutor
 	collectorID int
