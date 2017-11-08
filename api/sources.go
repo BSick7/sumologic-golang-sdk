@@ -128,7 +128,7 @@ func (s *Sources) Update(source *Source) (*Source, error) {
 	}
 	startreq.SetEndpoint(fmt.Sprintf("/collectors/%d/sources/%d", s.collectorID, source.ID))
 
-	startres, err := startreq.Put()
+	startres, err := startreq.Get()
 	if err != nil {
 		return nil, err
 	}
