@@ -31,6 +31,7 @@ type Source struct {
 	MultilineProcessingEnabled bool           `json:"multilineProcessingEnabled,omitempty"`
 	UseAutolineMatching        bool           `json:"useAutolineMatching,omitempty"`
 	ManualPrefixRegexp         string         `json:"manualPrefixRegexp,omitempty"`
+	MessagePerRequest          bool           `json:"messagePerRequest"`
 	DefaultDateFormat          string         `json:"defaultDateFormat,omitempty"`
 	DefaultDateFormats         []DateFormat   `json:"defaultDateFormats,omitempty"`
 	Filters                    []SourceFilter `json:"filters,omitempty"`
